@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Email Writing",
+    "description": "Write a prompt to generate a formal email requesting leave for 2 days."
+  },
+  {
+    "title": "Creative Writing",
+    "description": "Create a prompt to write a short inspirational story in 50 words."
+  },
+  {
+    "title": "Business Idea",
+    "description": "Write a prompt to suggest a unique startup idea for college students with low investment."
+  },
+  {
+    "title": "Summarization",
+    "description": "Create a prompt to summarize any paragraph into 3 bullet points."
+  },
+  {
+    "title": "Interview Prep",
+    "description": "Write a prompt to generate 3 basic interview questions on programming with answers."
+  },
+  {
+    "title": "Daily Life Planning",
+    "description": "Create a prompt to make a simple and productive daily schedule for a student."
+  },
+  {
+    "title": "Comparison Task",
+    "description": "Write a prompt to explain the difference between Machine Learning and Artificial Intelligence in simple points."
+  },
+  {
+    "title": "Instruction-Based Task",
+    "description": "Create a prompt to generate step-by-step instructions to create a PowerPoint presentation on any topic."
+  }
+]

@@ -1,0 +1,124 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Check if user is admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'admin@contest.com' ||
+        (
+          exists(/databases/$(database)/documents/users/admin) &&
+          get(/databases/$(database)/documents/users/admin).data.uid == request.auth.uid
+        )
+      );
+    }
+
+    // Helper: Get user's roll number from email
+    function getRollNumber() {
+      return request.auth.token.email.split('@')[0];
+    }
+
+    // ========================
+    // USERS COLLECTION
+    // ========================
+    match /users/{rollNumber} {
+      function isRollOwner() {
+        return request.auth != null && getRollNumber() == rollNumber;
+      }
+
+      function isUidOwner() {
+        return request.auth != null && resource != null && resource.data.uid == request.auth.uid;
+      }
+
+      function isValidUserCreate() {
+        return request.auth != null &&
+               request.resource.data.uid == request.auth.uid &&
+               request.resource.data.rollNumber == rollNumber &&
+               request.resource.data.role in ['participant', 'admin'];
+      }
+
+      function preservesSubmittedRounds() {
+        return (
+          !resource.data.round2Submitted || (
+            request.resource.data.round2Submitted == true &&
+            request.resource.data.round2Responses == resource.data.round2Responses &&
+            request.resource.data.round2SubmittedAt == resource.data.round2SubmittedAt &&
+            request.resource.data.round2TimeUsed == resource.data.round2TimeUsed &&
+            request.resource.data.round2TabSwitches == resource.data.round2TabSwitches &&
+            request.resource.data.round2TaskCount == resource.data.round2TaskCount &&
+            request.resource.data.round2TaskDurationSeconds == resource.data.round2TaskDurationSeconds &&
+            request.resource.data.round2Flow == resource.data.round2Flow
+          )
+        ) && (
+          !resource.data.round3Submitted || (
+            request.resource.data.round3Submitted == true &&
+            request.resource.data.quizAnswers == resource.data.quizAnswers &&
+            request.resource.data.quizScore == resource.data.quizScore &&
+            request.resource.data.quizCorrectCount == resource.data.quizCorrectCount &&
+            request.resource.data.quizTotalQuestions == resource.data.quizTotalQuestions &&
+            request.resource.data.round3SubmittedAt == resource.data.round3SubmittedAt &&
+            request.resource.data.round3TimeUsed == resource.data.round3TimeUsed &&
+            request.resource.data.round3TabSwitches == resource.data.round3TabSwitches
+          )
+        );
+      }
+
+      // Users can only read/write their own document
+      allow read: if request.auth != null &&
+                     (isRollOwner() || isUidOwner() || isAdmin());
+      
+      // Users can only write to their own document, with field restrictions
+      allow create: if isValidUserCreate() || isAdmin();
+      
+      allow update: if request.auth != null &&
+                       (isRollOwner() || isUidOwner() || isAdmin()) &&
+                       // Prevent users from modifying protected identity fields
+                       (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid', 'rollNumber', 'authEmail'])) &&
+                       preservesSubmittedRounds();
+      
+      // Only admin can delete user documents
+      allow delete: if isAdmin();
+    }
+
+    // ========================
+    // ADMIN CONTROLS
+    // ========================
+    match /adminControls/{document} {
+      // Everyone can read (needed for round status checks)
+      allow read: if request.auth != null;
+      
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+
+    // ========================
+    // ROUND 2 TASKS
+    // ========================
+    match /round2Tasks/{taskId} {
+      // Authenticated users can read (needed during round 2)
+      allow read: if request.auth != null;
+      
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+
+    // ========================
+    // QUIZ QUESTIONS
+    // ========================
+    match /quizQuestions/{questionId} {
+      // Only allow read when round 3 is active (security measure)
+      // Note: For simplicity, we allow read for authenticated users
+      // The correctAnswer field is needed for auto-grading on submit
+      allow read: if request.auth != null;
+      
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+
+    // Default: deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
