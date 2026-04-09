@@ -319,8 +319,6 @@ export default function Round3Page() {
               alignItems: 'center', marginTop: '2rem'
             }}>
               <div style={{ display: 'flex', gap: 8 }}>
-                {currentQ < questions.length - 1 && (
-                <>
                 <button
                   className="btn btn-secondary"
                   onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
@@ -328,13 +326,13 @@ export default function Round3Page() {
                 >
                   ← Previous
                 </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setCurrentQ(Math.min(questions.length - 1, currentQ + 1))}
-                  disabled={currentQ === questions.length - 1}
-                >
-                  Next →
-                </button>
+                {currentQ < questions.length - 1 && (
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setCurrentQ(Math.min(questions.length - 1, currentQ + 1))}
+                  >
+                    Next →
+                  </button>
                 )}
               </div>
               {currentQ === questions.length - 1 && (
