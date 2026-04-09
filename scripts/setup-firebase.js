@@ -15,7 +15,7 @@
  * node scripts/setup-firebase.js
  */
 
-const admin = require('firebase-admin');
+const admin = require('firebase-admin');   
 const crypto = require('crypto');
 
 // Initialize Firebase Admin
