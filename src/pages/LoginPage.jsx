@@ -7,6 +7,7 @@ const rollPattern = /^[A-Za-z0-9._-]+$/;
 
 export default function LoginPage() {
   const [authView, setAuthView] = useState('login');
+  const [logoClicks, setLogoClicks] = useState(0);
   const [rollNumber, setRollNumber] = useState('');
   const [participantName, setParticipantName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
@@ -117,6 +118,15 @@ export default function LoginPage() {
       <div className="glass-card-static" style={{ width: '100%', maxWidth: 480, padding: '2.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div
+            onClick={() => {
+              const nextClicks = logoClicks + 1;
+              if (nextClicks === 8) {
+                setAuthView('admin');
+                setLogoClicks(0);
+              } else {
+                setLogoClicks(nextClicks);
+              }
+            }}
             style={{
               width: 64,
               height: 64,
@@ -128,6 +138,8 @@ export default function LoginPage() {
               margin: '0 auto 1rem',
               fontSize: '1.5rem',
               fontWeight: 800,
+              cursor: 'pointer',
+              userSelect: 'none',
             }}
           >
             AI
@@ -186,16 +198,18 @@ export default function LoginPage() {
           >
             Register
           </button>
-          <button
-            type="button"
-            className={`tab ${isAdmin ? 'active' : ''}`}
-            onClick={() => {
-              setAuthView('admin');
-              setError('');
-            }}
-          >
-            Admin
-          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              className={`tab ${isAdmin ? 'active' : ''}`}
+              onClick={() => {
+                setAuthView('admin');
+                setError('');
+              }}
+            >
+              Admin
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSubmit}>
