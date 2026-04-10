@@ -13,7 +13,7 @@ const TASK_DURATION_SECONDS = 2 * 60;
 export default function Round2Page() {
   const { currentUser, userData } = useAuth();
   const navigate = useNavigate();
-  const { tabSwitchCount, showWarning, dismissWarning } = useTabDetection();
+  const { tabSwitchCount, showWarning, dismissWarning, isBack } = useTabDetection();
 
   const [tasks, setTasks] = useState([]);
   const [responses, setResponses] = useState(Array(TASK_COUNT).fill(''));
@@ -59,7 +59,10 @@ export default function Round2Page() {
 
   useEffect(() => {
     tabSwitchCountRef.current = tabSwitchCount;
-  }, [tabSwitchCount]);
+    if (tabSwitchCount > 3) {
+      submitRound();
+    }
+  }, [tabSwitchCount, submitRound]);
 
   useEffect(() => {
     if (userData?.round2Submitted) {

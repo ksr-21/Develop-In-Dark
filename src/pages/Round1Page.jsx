@@ -7,7 +7,6 @@ import useTabDetection from '../hooks/useTabDetection';
 
 export default function Round1Page() {
   const { userData } = useAuth();
-  const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formOpened, setFormOpened] = useState(false);
@@ -46,7 +45,6 @@ export default function Round1Page() {
     setLoading(true);
     try {
       await updateDoc(doc(db, 'users', userData.rollNumber), {
-        round1Prompt: prompt.trim(),
         round1Submitted: true,
         round1SubmittedAt: new Date().toISOString(),
         round1TabSwitches: tabSwitchCount,
@@ -109,8 +107,11 @@ export default function Round1Page() {
       {/* Content */}
       <div className="container" style={{ padding: '2rem 1.5rem', maxWidth: 900 }}>
         <div className="slide-up" style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
+            Scenario:
+          </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-            Generate an image by writing the best prompt based on a given scenario.
+            {adminControls?.round1Scenario || 'Generate an image by writing the best prompt based on a given scenario.'}
           </p>
         </div>
 
@@ -135,46 +136,42 @@ export default function Round1Page() {
           />
         </div>
 
-        {/* Prompt Input */}
-        <div className="glass-card-static slide-up stagger-2" style={{ padding: '1.5rem' }}>
-          <div className="input-group" style={{ marginBottom: '1rem' }}>
-            <label htmlFor="promptInput" style={{ fontWeight: 600, fontSize: '0.95rem' }}>
-              Your Prompt
-            </label>
-            <textarea
-              id="promptInput"
-              className="input-field"
-              placeholder="Write a detailed, descriptive prompt to recreate the image above..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              style={{ minHeight: 180, fontFamily: "'JetBrains Mono', monospace", fontSize: '0.9rem' }}
-            />
-          </div>
+        {/* Submission Section */}
+        <div className="glass-card-static slide-up stagger-2" style={{ padding: '2rem', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>
+            Submission
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+            Click the button below to open the submission form in a new tab.
+            Once you have submitted your prompt on the form, come back here and click "Submitted" to update your progress.
+          </p>
+
           <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            alignItems: 'center'
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1rem'
           }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              {prompt.length} characters
-            </span>
-            {!formOpened ? (
-              <button
-                className="btn btn-primary btn-lg"
-                onClick={handleOpenForm}
-                disabled={loading}
-              >
-                Go to Form →
-              </button>
-            ) : (
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={handleOpenForm}
+              disabled={loading || submitted}
+              style={{ width: '100%', maxWidth: 300 }}
+            >
+              Go to Submission Form →
+            </button>
+
+            {formOpened && (
               <button
                 className="btn btn-success btn-lg"
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={loading || submitted}
+                style={{ width: '100%', maxWidth: 300 }}
               >
                 {loading ? (
                   <>
                     <span className="spinner spinner-sm"></span>
-                    Updating...
+                    Updating Admin Panel...
                   </>
                 ) : (
                   'Submitted'
