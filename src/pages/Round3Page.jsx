@@ -77,11 +77,18 @@ export default function Round3Page() {
 
   const handleAutoSubmit = useCallback(async () => {
     if (submitted) return;
-    await submitQuiz();
+    await submitQuiz(true);
   }, [submitted, answers, questions]);
 
-  async function submitQuiz() {
+  async function submitQuiz(isAuto = false) {
     if (loading || submitted || userData?.round3Submitted) return;
+
+    if (!isAuto) {
+      if (!window.confirm('Are you sure you want to submit the quiz? After submitting you will not be able to change your answers.')) {
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const rollNumber = userData?.rollNumber || currentUser?.email?.split('@')[0];
@@ -338,7 +345,7 @@ export default function Round3Page() {
               {currentQ === questions.length - 1 && (
               <button
                 className="btn btn-success btn-lg"
-                onClick={submitQuiz}
+                onClick={() => submitQuiz(false)}
                 disabled={loading}
               >
                 {loading ? (

@@ -10,6 +10,7 @@ export default function Round1Page() {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formOpened, setFormOpened] = useState(false);
   const [adminControls, setAdminControls] = useState(null);
   const navigate = useNavigate();
   const { tabSwitchCount, showWarning, dismissWarning } = useTabDetection();
@@ -35,8 +36,13 @@ export default function Round1Page() {
     }
   }, [userData]);
 
+  function handleOpenForm() {
+    window.open('https://docs.google.com/forms/d/e/1FAIpQLSc_sb8TPup4blj-AUmZu3S4aK92xQVs0X_Eu1QicwLh86oxQg/viewform?usp=publish-editor', '_blank');
+    setFormOpened(true);
+  }
+
   async function handleSubmit() {
-    if (!prompt.trim()) return;
+    if (loading || submitted || userData?.round1Submitted) return;
     setLoading(true);
     try {
       await updateDoc(doc(db, 'users', userData.rollNumber), {
@@ -86,7 +92,7 @@ export default function Round1Page() {
       <div className="round-header">
         <div className="round-title">
           <span className="round-number">Round 1</span>
-          <h2 className="heading-md">Image → Prompt</h2>
+          <h2 className="heading-md">Scenario to Image</h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {tabSwitchCount > 0 && (
@@ -104,8 +110,7 @@ export default function Round1Page() {
       <div className="container" style={{ padding: '2rem 1.5rem', maxWidth: 900 }}>
         <div className="slide-up" style={{ marginBottom: '1.5rem' }}>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-            Study the image below carefully. Write a detailed prompt that could be used to 
-            recreate this image using an AI image generator. Be as specific and descriptive as possible.
+            Generate an image by writing the best prompt based on a given scenario.
           </p>
         </div>
 
@@ -152,20 +157,30 @@ export default function Round1Page() {
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               {prompt.length} characters
             </span>
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={handleSubmit}
-              disabled={loading || prompt.trim().length < 10}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner spinner-sm"></span>
-                  Submitting...
-                </>
-              ) : (
-                'Submit Prompt →'
-              )}
-            </button>
+            {!formOpened ? (
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={handleOpenForm}
+                disabled={loading}
+              >
+                Go to Form →
+              </button>
+            ) : (
+              <button
+                className="btn btn-success btn-lg"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner spinner-sm"></span>
+                    Updating...
+                  </>
+                ) : (
+                  'Submitted'
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
