@@ -37,6 +37,73 @@ export default function Round2Page() {
   const completedCount = submitted ? TASK_COUNT : currentTaskIndex;
   const participantSeed = currentUser?.email?.split('@')[0] || userData?.rollNumber || '';
 
+  const submitRound = useCallback(async () => {
+    if (loadingRef.current || submittedRef.current || !userData?.rollNumber) return;
+
+    loadingRef.current = true;
+    setLoading(true);
+
+    try {
+      const activeTasks = tasksRef.current.slice(0, TASK_COUNT);
+      const responseArray = activeTasks.map((task, index) => ({
+        taskId: task.id,
+        taskTitle: task.title || `Task ${index + 1}`,
+        response: responsesRef.current[index] || '',
+      }));
+
+      await setDoc(
+        doc(db, 'users', userData.rollNumber),
+        {
+          round2Responses: responseArray,
+          round2Submitted: true,
+          round2SubmittedAt: new Date().toISOString(),
+          round2TimeUsed: TASK_COUNT * TASK_DURATION_SECONDS,
+          round2TabSwitches: tabSwitchCountRef.current,
+          round2TaskCount: TASK_COUNT,
+          round2TaskDurationSeconds: TASK_DURATION_SECONDS,
+          round2Flow: 'sequential-prompt-writing',
+        },
+        { merge: true }
+      );
+
+      submittedRef.current = true;
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Failed to submit Round 2:', error);
+    } finally {
+      loadingRef.current = false;
+      setLoading(false);
+    }
+  }, [userData?.rollNumber]);
+
+  const advanceToNextTask = useCallback(async (isAuto = false) => {
+    if (transitionRef.current || loadingRef.current || submittedRef.current) return;
+
+    if (!isAuto && currentTaskRef.current < TASK_COUNT - 1) {
+      if (!window.confirm('Are you sure you want to go to the next task? You cannot come back to the previous task.')) {
+        return;
+      }
+    }
+
+    if (!isAuto && currentTaskRef.current === TASK_COUNT - 1) {
+      if (!window.confirm('Are you sure you want to submit? After submitting you will not be able to change your responses.')) {
+        return;
+      }
+    }
+
+    transitionRef.current = true;
+
+    try {
+      if (currentTaskRef.current >= TASK_COUNT - 1) {
+        await submitRound();
+      } else {
+        setCurrentTaskIndex((prev) => Math.min(prev + 1, TASK_COUNT - 1));
+      }
+    } finally {
+      transitionRef.current = false;
+    }
+  }, [submitRound]);
+
   useEffect(() => {
     responsesRef.current = responses;
   }, [responses]);
@@ -118,73 +185,6 @@ export default function Round2Page() {
       cancelled = true;
     };
   }, [participantSeed]);
-
-  const submitRound = useCallback(async () => {
-    if (loadingRef.current || submittedRef.current || !userData?.rollNumber) return;
-
-    loadingRef.current = true;
-    setLoading(true);
-
-    try {
-      const activeTasks = tasksRef.current.slice(0, TASK_COUNT);
-      const responseArray = activeTasks.map((task, index) => ({
-        taskId: task.id,
-        taskTitle: task.title || `Task ${index + 1}`,
-        response: responsesRef.current[index] || '',
-      }));
-
-      await setDoc(
-        doc(db, 'users', userData.rollNumber),
-        {
-          round2Responses: responseArray,
-          round2Submitted: true,
-          round2SubmittedAt: new Date().toISOString(),
-          round2TimeUsed: TASK_COUNT * TASK_DURATION_SECONDS,
-          round2TabSwitches: tabSwitchCountRef.current,
-          round2TaskCount: TASK_COUNT,
-          round2TaskDurationSeconds: TASK_DURATION_SECONDS,
-          round2Flow: 'sequential-prompt-writing',
-        },
-        { merge: true }
-      );
-
-      submittedRef.current = true;
-      setSubmitted(true);
-    } catch (error) {
-      console.error('Failed to submit Round 2:', error);
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-  }, [userData?.rollNumber]);
-
-  const advanceToNextTask = useCallback(async (isAuto = false) => {
-    if (transitionRef.current || loadingRef.current || submittedRef.current) return;
-
-    if (!isAuto && currentTaskRef.current < TASK_COUNT - 1) {
-      if (!window.confirm('Are you sure you want to go to the next task? You cannot come back to the previous task.')) {
-        return;
-      }
-    }
-
-    if (!isAuto && currentTaskRef.current === TASK_COUNT - 1) {
-      if (!window.confirm('Are you sure you want to submit? After submitting you will not be able to change your responses.')) {
-        return;
-      }
-    }
-
-    transitionRef.current = true;
-
-    try {
-      if (currentTaskRef.current >= TASK_COUNT - 1) {
-        await submitRound();
-      } else {
-        setCurrentTaskIndex((prev) => Math.min(prev + 1, TASK_COUNT - 1));
-      }
-    } finally {
-      transitionRef.current = false;
-    }
-  }, [submitRound]);
 
   useEffect(() => {
     if (submitted || loading || !tasksLoaded || !hasAllTasks) return;
