@@ -50,8 +50,8 @@ export default function Dashboard() {
   const rounds = [
     {
       num: 1,
-      title: 'Image to Prompt',
-      desc: 'Analyze an image and write the perfect prompt to recreate it',
+      title: 'Scenario to Image',
+      desc: 'Generate an image by writing the best prompt based on a given scenario.',
       icon: '🖼️',
       gradient: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
     },

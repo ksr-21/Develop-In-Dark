@@ -155,8 +155,20 @@ export default function Round2Page() {
     }
   }, [userData?.rollNumber]);
 
-  const advanceToNextTask = useCallback(async () => {
+  const advanceToNextTask = useCallback(async (isAuto = false) => {
     if (transitionRef.current || loadingRef.current || submittedRef.current) return;
+
+    if (!isAuto && currentTaskRef.current < TASK_COUNT - 1) {
+      if (!window.confirm('Are you sure you want to go to the next task? You cannot come back to the previous task.')) {
+        return;
+      }
+    }
+
+    if (!isAuto && currentTaskRef.current === TASK_COUNT - 1) {
+      if (!window.confirm('Are you sure you want to submit? After submitting you will not be able to change your responses.')) {
+        return;
+      }
+    }
 
     transitionRef.current = true;
 
@@ -187,7 +199,7 @@ export default function Round2Page() {
             clearInterval(timerRef.current);
             timerRef.current = null;
           }
-          void advanceToNextTask();
+          void advanceToNextTask(true);
           return 0;
         }
 
@@ -431,7 +443,7 @@ export default function Round2Page() {
               </span>
               <button
                 className="btn btn-primary btn-sm"
-                onClick={() => void advanceToNextTask()}
+                onClick={() => void advanceToNextTask(false)}
                 disabled={loading}
               >
                 {isLastTask ? 'Submit Final Task' : 'Next Task →'}

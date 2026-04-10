@@ -345,7 +345,7 @@ function RoundControl({ adminControls, toggleRound, users }) {
         <div className="glass-card-static" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div>
-              <h3 className="heading-md">🖼️ Round 1: Image → Prompt</h3>
+              <h3 className="heading-md">🖼️ Round 1: Scenario to Image</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
                 {users.filter(u => u.round1Submitted).length} submitted
               </p>
