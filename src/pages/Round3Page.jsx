@@ -11,6 +11,7 @@ const QUIZ_DURATION = 25 * 60; // 25 minutes
 
 export default function Round3Page() {
   const { currentUser, userData } = useAuth();
+  const { tabSwitchCount, showWarning, dismissWarning, isBack } = useTabDetection();
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [currentQ, setCurrentQ] = useState(0);
@@ -21,7 +22,6 @@ export default function Round3Page() {
   const [score] = useState(null);
   const timerRef = useRef(null);
   const navigate = useNavigate();
-  const { tabSwitchCount, showWarning, dismissWarning } = useTabDetection();
   const participantSeed = currentUser?.email?.split('@')[0] || userData?.rollNumber || '';
 
   // Listen to admin controls
@@ -58,6 +58,12 @@ export default function Round3Page() {
       setSubmitted(true);
     }
   }, [userData]);
+
+  useEffect(() => {
+    if (tabSwitchCount > 3) {
+      submitQuiz(true);
+    }
+  }, [tabSwitchCount]);
 
   // Timer
   useEffect(() => {

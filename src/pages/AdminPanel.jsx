@@ -343,7 +343,7 @@ function RoundControl({ adminControls, toggleRound, users }) {
       <div style={{ display: 'grid', gap: '1.5rem' }}>
         {/* Round 1 */}
         <div className="glass-card-static" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div>
               <h3 className="heading-md">🖼️ Round 1: Scenario to Image</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: 4 }}>
@@ -357,9 +357,35 @@ function RoundControl({ adminControls, toggleRound, users }) {
               {adminControls?.round1Active ? 'Deactivate' : 'Activate'}
             </button>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: 0, lineHeight: 1.6 }}>
-            Use the activation button to open the image generation round.
-          </p>
+
+          <div className="input-group">
+            <label>Round 1 Scenario</label>
+            <textarea
+              className="input-field"
+              placeholder="Enter the scenario for Round 1..."
+              value={adminControls?.round1Scenario || ''}
+              onChange={async (e) => {
+                await updateDoc(doc(db, 'adminControls', 'main'), {
+                  round1Scenario: e.target.value
+                });
+              }}
+              style={{ minHeight: 80 }}
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Round 1 Image URL (Optional)</label>
+            <input
+              className="input-field"
+              placeholder="https://example.com/image.jpg"
+              value={adminControls?.round1ImageUrl || ''}
+              onChange={async (e) => {
+                await updateDoc(doc(db, 'adminControls', 'main'), {
+                  round1ImageUrl: e.target.value
+                });
+              }}
+            />
+          </div>
         </div>
 
         {/* Round 2 */}

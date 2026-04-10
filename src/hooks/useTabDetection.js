@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 export default function useTabDetection() {
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
+  const [isBack, setIsBack] = useState(false);
 
   useEffect(() => {
     function handleVisibilityChange() {
@@ -12,6 +13,9 @@ export default function useTabDetection() {
           return newCount;
         });
         setShowWarning(true);
+        setIsBack(false);
+      } else {
+        setIsBack(true);
       }
     }
 
@@ -25,5 +29,5 @@ export default function useTabDetection() {
     setShowWarning(false);
   }, []);
 
-  return { tabSwitchCount, showWarning, dismissWarning };
+  return { tabSwitchCount, showWarning, dismissWarning, isBack };
 }
